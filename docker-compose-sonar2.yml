@@ -1,0 +1,76 @@
+services:
+  sonarqube2:
+    image: sonarqube:community
+    depends_on:
+      - sonar_db2
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonar_db2:5432/sonar2
+      SONAR_JDBC_USERNAME: sonar2
+      SONAR_JDBC_PASSWORD: sonar2
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
+      SONAR_ES_JAVA_OPTS: "-Xms2g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=2g"
+      SONAR_WEB_JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC"
+      SONAR_CE_JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC"
+      SONAR_ES_JAVA_ADDITIONAL_OPTS: "-Xms2g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=2g"
+      # Additional Elasticsearch settings for stability
+      SONAR_ES_HTTP_PORT: "9001"
+      SONAR_ES_TCP_PORT: "9002"
+      # Reduce Elasticsearch memory usage
+      SONAR_ES_NODE_NAME: "sonarqube2"
+      SONAR_ES_CLUSTER_NAME: "sonarqube2"
+    ports:
+      - "9004:9000" # Different port from the first instance (9003)
+    volumes:
+      - sonarqube2_conf:/opt/sonarqube/conf
+      - sonarqube2_data:/opt/sonarqube/data
+      - sonarqube2_extensions:/opt/sonarqube/extensions
+      - sonarqube2_logs:/opt/sonarqube/logs
+      - sonarqube2_temp:/opt/sonarqube/temp
+    deploy:
+      resources:
+        limits:
+          memory: 7g
+        reservations:
+          memory: 2g
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - sonarqube2-net
+
+  sonar_db2:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: sonar2
+      POSTGRES_PASSWORD: sonar2
+      POSTGRES_DB: sonar2
+    volumes:
+      - sonar_db2:/var/lib/postgresql
+      - sonar_db2_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # Different port from the first instance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sonar2"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sonarqube2-net
+
+volumes:
+  sonarqube2_conf:
+  sonarqube2_data:
+  sonarqube2_extensions:
+  sonarqube2_logs:
+  sonarqube2_temp:
+  sonar_db2:
+  sonar_db2_data:
+
+networks:
+  sonarqube2-net:
+    driver: bridge
