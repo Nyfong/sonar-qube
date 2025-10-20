@@ -8,10 +8,10 @@ services:
       SONAR_JDBC_USERNAME: sonar2
       SONAR_JDBC_PASSWORD: sonar2
       SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: true
-      SONAR_ES_JAVA_OPTS: "-Xms2g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=2g"
-      SONAR_WEB_JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC"
-      SONAR_CE_JAVA_OPTS: "-Xms1g -Xmx2g -XX:+UseG1GC"
-      SONAR_ES_JAVA_ADDITIONAL_OPTS: "-Xms2g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=2g"
+      SONAR_ES_JAVA_OPTS: "-Xms3g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=3g"
+      SONAR_WEB_JAVA_OPTS: "-Xms1g -Xmx3g -XX:+UseG1GC"
+      SONAR_CE_JAVA_OPTS: "-Xms1g -Xmx3g -XX:+UseG1GC"
+      SONAR_ES_JAVA_ADDITIONAL_OPTS: "-Xms3g -Xmx4g -XX:+UseG1GC -XX:MaxDirectMemorySize=3g"
       # Additional Elasticsearch settings for stability
       SONAR_ES_HTTP_PORT: "9001"
       SONAR_ES_TCP_PORT: "9002"
@@ -29,9 +29,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 7g
+          memory: 8g
         reservations:
-          memory: 2g
+          memory: 3g
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/api/system/status"]
